@@ -9,13 +9,14 @@ using RestSharp;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Security;
+using System.Net.Http;
 
 namespace ReadExcel
 {
     class Program
     {
         static void Main(string[] args)
-        { 
+        {
             // Abrir arquivo Excel
             var xls = new XLWorkbook(@"C:\Users\Nuno\Documents\data.xlsx");
 
@@ -26,17 +27,17 @@ namespace ReadExcel
             Console.WriteLine("Os dados no ficheiro Excel são:\n");
 
             Console.WriteLine("".PadRight(55, '-'));
-            Console.WriteLine("Nome".PadRight(10) + "Idade".PadLeft(15));
+            Console.WriteLine("Nome".PadRight(10) + "Idade".PadLeft(15) + "Distrito".PadLeft(20));
             Console.WriteLine("".PadRight('-'));
 
             // primeira linha é o cabecalho
             var linha = 2;
-            
+
             while (true)
             {
 
                 var nome = planilha.Cell("A" + linha.ToString()).Value.ToString();
-               
+
                 if (string.IsNullOrEmpty(nome))
                 {
                     break;
@@ -45,76 +46,50 @@ namespace ReadExcel
                 Console.Write(nome.PadRight(5));
                 Console.Write("".PadLeft(15));
                 Console.WriteLine(Convert.ToInt32(planilha.Cell("B" + linha.ToString()).Value.ToString()));
+                Console.Write("".PadLeft(35));
+                Console.WriteLine(Convert.ToString(planilha.Cell("C" + linha.ToString()).Value.ToString()));
 
                 linha++;
 
             }
 
+
             //fecha Excel
             xls.Dispose();
 
-            Console.WriteLine("".PadRight(10,'-'));
+            Console.WriteLine("".PadRight(10, '-'));
             Console.WriteLine("Feito!!");
 
-            Console.ReadKey();
-        
-        }
-
-        protected void LinkWebpage(object sender, EventArgs e)
-        {
-            //Vai ligar-se ao portal de pedidos
-
-            WebRequest request = WebRequest.Create("https://claimopenpt.duckdns.org/auth/login");
-            request.Method = "GET";
-            request.Credentials = new NetworkCredential("nuno.pereira@pt.softinsa.com", "init1234");
-            WebResponse response = request.GetResponse();
-
-            Console.WriteLine(((HttpWebResponse)response).StatusDescription);
-
-            //envia para o servidor a autenticação
-            Stream dataStream = response.GetResponseStream();
-         
-        }
-        protected void Page_Load( EventArgs e)
-        {
-
-            // Create a request using a URL that can receive a post. 
-            WebRequest request = WebRequest.Create("https://claimopenpt.duckdns.org/timesheet");
-            // Set the Method property of the request to POST.
+            string param = "username=nuno.pereira@pt.softins.com&password=init1234";
+            string url = "https://claimopenpt.duckdns.org/auth/login";
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
-
-            // Create POST data and convert it to a byte array.
-            string postData = "Teste";
-            byte[] byteArray = Encoding.UTF8.GetBytes(postData);
-            // Set the ContentType property of the WebRequest.
+            request.ContentLength = param.Length;
             request.ContentType = "application/x-www-form-urlencoded";
-            // Set the ContentLength property of the WebRequest.
-            request.ContentLength = byteArray.Length;
+            request.CookieContainer = new CookieContainer();
 
-            // Get the request stream.
-            Stream dataStream = request.GetRequestStream();
-            // Write the data to the request stream.
-            dataStream.Write(byteArray, 0, byteArray.Length);
-            // Close the Stream object.
-            dataStream.Close();
+            using (Stream stream = request.GetRequestStream())
+            {
+                byte[] paramAsBytes = Encoding.Default.GetBytes(param);
+                stream.Write(paramAsBytes, 0, paramAsBytes.Count());
+            }
 
-            // Get the response.
-            WebResponse response = request.GetResponse();
-            // Display the status.
-            Console.WriteLine(((HttpWebResponse)response).StatusDescription);
-            // Get the stream containing content returned by the server.
-            dataStream = response.GetResponseStream();
-            // Open the stream using a StreamReader for easy access.
-            StreamReader reader = new StreamReader(dataStream);
-            // Read the content.
-            string responseFromServer = reader.ReadToEnd();
-            // Display the content.
-            Console.WriteLine(responseFromServer);
-            // Clean up the streams.
-            reader.Close();
-            dataStream.Close();
-            response.Close();
+            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+            {
+                foreach (var cookie in response.Cookies)
+                {
+                    var properties = cookie.GetType()
+                                           .GetProperties()
+                                           .Select(p => new
+                                           {
+                                               Name = p.Name,
+                                               Value = p.GetValue(cookie)
+                                           });
+                }
+            }
 
+            Console.ReadKey();
         }
+
     }
 }
