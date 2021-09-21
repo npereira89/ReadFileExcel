@@ -4,15 +4,16 @@ using ClosedXML.Excel;
 using System.Text;
 using System.Net;
 using System.IO;
-
+using ToolsQA;
 
 namespace ReadExcel
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             // Abrir arquivo Excel
+            //var xls = new XLWorkbook(@"C:\Users\3100945\Documents\data.xlsx"); -< PC do trabalho
             var xls = new XLWorkbook(@"C:\Users\Nuno\Documents\data.xlsx");
 
 
@@ -22,7 +23,7 @@ namespace ReadExcel
             Console.WriteLine("Os dados no ficheiro Excel são:\n");
 
             Console.WriteLine("".PadRight(55, '-'));
-            Console.WriteLine("Nome".PadRight(10) + "Idade".PadLeft(15) + "Distrito".PadLeft(20));
+            Console.WriteLine("Nome".PadRight(10) + "Distrito".PadLeft(20));
             Console.WriteLine("".PadRight('-'));
 
             // primeira linha é o cabecalho
@@ -40,7 +41,7 @@ namespace ReadExcel
 
                 Console.Write(nome.PadRight(5));
                 Console.Write("".PadLeft(15));
-                Console.WriteLine(Convert.ToInt32(planilha.Cell("B" + linha.ToString()).Value.ToString()));
+                Console.WriteLine(Convert.ToString(planilha.Cell("B" + linha.ToString()).Value.ToString()));
                 Console.Write("".PadLeft(35));
                 Console.WriteLine(Convert.ToString(planilha.Cell("C" + linha.ToString()).Value.ToString()));
 
@@ -53,7 +54,12 @@ namespace ReadExcel
             xls.Dispose();
 
             Console.WriteLine("".PadRight(10, '-'));
-            Console.WriteLine("Feito!!");
+
+            ConetaSite liga_ao_site = new ConetaSite();
+
+            liga_ao_site.AbreLigacao();
+            liga_ao_site.IniciaLigacao();
+            liga_ao_site.FechaLigacao();
 
             Console.ReadKey();
         }
