@@ -4,16 +4,16 @@ using ClosedXML.Excel;
 using System.Text;
 using System.Net;
 using System.IO;
-
+using ToolsQA;
 
 namespace ReadExcel
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             // Abrir arquivo Excel
-            var xls = new XLWorkbook(@"C:\Users\Nuno\Documents\data.xlsx");
+            var xls = new XLWorkbook(@"C:\Users\3100945\Documents\data.xlsx");
 
 
             var planilha = xls.Worksheets.First(w => w.Name == "Clientes");
@@ -40,7 +40,7 @@ namespace ReadExcel
 
                 Console.Write(nome.PadRight(5));
                 Console.Write("".PadLeft(15));
-                Console.WriteLine(Convert.ToInt32(planilha.Cell("B" + linha.ToString()).Value.ToString()));
+                Console.WriteLine(Convert.ToString(planilha.Cell("B" + linha.ToString()).Value.ToString()));
                 Console.Write("".PadLeft(35));
                 Console.WriteLine(Convert.ToString(planilha.Cell("C" + linha.ToString()).Value.ToString()));
 
@@ -53,7 +53,12 @@ namespace ReadExcel
             xls.Dispose();
 
             Console.WriteLine("".PadRight(10, '-'));
-            Console.WriteLine("Feito!!");
+
+            ConetaSite liga_ao_site = new ConetaSite();
+
+            liga_ao_site.AbreLigacao();
+            liga_ao_site.IniciaLigacao();
+            liga_ao_site.FechaLigacao();
 
             Console.ReadKey();
         }
