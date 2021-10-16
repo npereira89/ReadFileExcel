@@ -23,7 +23,7 @@ namespace ToolsQA
             Console.WriteLine("vou ligar!!");
         }
 
-       
+        [Test]
         public void AbreLigacao()
         {
             Console.WriteLine("A ligar...");
